@@ -1,0 +1,135 @@
+from telegram import Update
+from telegram.ext import ContextTypes
+
+from app.states.application_states import (
+    NAME,
+    PHONE,
+    DESCRIPTION,
+    END,
+)
+
+from app.keyboards.cancel_keyboard import get_cancel_keyboard
+from app.keyboards.main_menu import get_main_menu
+from app.utils.validators import is_valid_phone
+
+
+async def start_application(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Начало оформления заявки."""
+
+    context.user_data.clear()
+
+    await update.message.reply_text(
+        text=(
+            "📝 Оформление заявки\n\n"
+            "Введите ваше имя:"
+        ),
+        reply_markup=get_cancel_keyboard(),
+    )
+
+    return NAME
+
+
+async def get_name(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Получение имени."""
+
+    text = update.message.text.strip()
+
+    if text == "⬅️ Отмена":
+        context.user_data.clear()
+
+        await update.message.reply_text(
+            "❌ Оформление заявки отменено.",
+            reply_markup=get_main_menu(),
+        )
+
+        return END
+
+    context.user_data["name"] = text
+
+    await update.message.reply_text(
+        "📞 Введите номер телефона:"
+    )
+
+    return PHONE
+
+
+async def get_phone(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Получение телефона."""
+
+    text = update.message.text.strip()
+
+    if text == "⬅️ Отмена":
+        context.user_data.clear()
+
+        await update.message.reply_text(
+            "❌ Оформление заявки отменено.",
+            reply_markup=get_main_menu(),
+        )
+
+        return END
+
+    if not is_valid_phone(text):
+        await update.message.reply_text(
+            "❌ Неверный номер телефона.\n\n"
+            "Пример:\n"
+            "+79991234567"
+        )
+
+        return PHONE
+
+    context.user_data["phone"] = text
+
+    await update.message.reply_text(
+        "📝 Опишите вашу заявку:"
+    )
+
+    return DESCRIPTION
+
+
+async def get_description(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Получение описания заявки."""
+
+    text = update.message.text.strip()
+
+    if text == "⬅️ Отмена":
+        context.user_data.clear()
+
+        await update.message.reply_text(
+            "❌ Оформление заявки отменено.",
+            reply_markup=get_main_menu(),
+        )
+
+        return END
+
+    context.user_data["description"] = text
+
+    # Пока что просто показываем данные.
+    # На следующем этапе подключим Excel и Email.
+
+    await update.message.reply_text(
+        text=(
+            "✅ Заявка заполнена!\n\n"
+            f"👤 Имя: {context.user_data['name']}\n"
+            f"📞 Телефон: {context.user_data['phone']}\n"
+            f"📝 Заявка:\n"
+            f"{context.user_data['description']}\n\n"
+            "💾 Следующим этапом мы научим бота сохранять заявки."
+        ),
+        reply_markup=get_main_menu(),
+    )
+
+    context.user_data.clear()
+
+    return END
