@@ -11,7 +11,7 @@ from app.states.application_states import (
 from app.keyboards.cancel_keyboard import get_cancel_keyboard
 from app.keyboards.main_menu import get_main_menu
 from app.utils.validators import is_valid_phone
-
+from app.services.excel_service import excel_service
 
 async def start_application(
     update: Update,
@@ -115,17 +115,20 @@ async def get_description(
 
     context.user_data["description"] = text
 
-    # Пока что просто показываем данные.
-    # На следующем этапе подключим Excel и Email.
+    application_id = excel_service.save_application(
+    name=context.user_data["name"],
+    phone=context.user_data["phone"],
+    description=context.user_data["description"],
+)
 
     await update.message.reply_text(
         text=(
-            "✅ Заявка заполнена!\n\n"
+            f"✅ Заявка №{application_id} успешно создана!\n\n"
             f"👤 Имя: {context.user_data['name']}\n"
             f"📞 Телефон: {context.user_data['phone']}\n"
             f"📝 Заявка:\n"
             f"{context.user_data['description']}\n\n"
-            "💾 Следующим этапом мы научим бота сохранять заявки."
+            "📨 Мы свяжемся с вами в ближайшее время."
         ),
         reply_markup=get_main_menu(),
     )
