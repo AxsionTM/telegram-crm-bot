@@ -23,7 +23,7 @@ from app.states.application_states import (
 )
 
 from app.utils.logger import setup_logger
-
+from app.handlers.contacts import contacts
 
 def main() -> None:
     """Запуск Telegram CRM Bot."""
@@ -41,6 +41,13 @@ def main() -> None:
             start,
         )
     )
+
+    app.add_handler(
+    MessageHandler(
+        filters.Regex("^ℹ️ Контакты$"),
+        contacts,
+    )
+)
 
     # Диалог оформления заявки
     application_handler = ConversationHandler(
