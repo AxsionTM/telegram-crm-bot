@@ -115,7 +115,7 @@ async def get_description(
 
     context.user_data["description"] = text
 
-    application_id = excel_service.save_application(
+    application = excel_service.create(
     name=context.user_data["name"],
     phone=context.user_data["phone"],
     description=context.user_data["description"],
@@ -123,11 +123,10 @@ async def get_description(
 
     await update.message.reply_text(
         text=(
-            f"✅ Заявка №{application_id} успешно создана!\n\n"
+            f"✅ Заявка №{application.id} успешно создана!\n"
             f"👤 Имя: {context.user_data['name']}\n"
             f"📞 Телефон: {context.user_data['phone']}\n"
-            f"📝 Заявка:\n"
-            f"{context.user_data['description']}\n\n"
+            f"📝 Заявка: {context.user_data['description']}\n\n"
             "📨 Мы свяжемся с вами в ближайшее время."
         ),
         reply_markup=get_main_menu(),
