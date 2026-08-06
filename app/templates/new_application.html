@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+padding:40px;
+background:#edf2f7;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+.wrapper{
+max-width:720px;
+margin:auto;
+}
+
+.card{
+
+background:white;
+
+border-radius:18px;
+
+overflow:hidden;
+
+box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+.header{
+
+background:#2563eb;
+
+padding:35px;
+
+text-align:center;
+
+color:white;
+
+}
+
+.logo{
+
+font-size:34px;
+
+margin-bottom:10px;
+
+}
+
+.title{
+
+font-size:28px;
+
+font-weight:bold;
+
+}
+
+.subtitle{
+
+margin-top:10px;
+
+opacity:.9;
+
+}
+
+.content{
+
+padding:35px;
+
+}
+
+.block{
+
+margin-bottom:24px;
+
+}
+
+.label{
+
+font-size:13px;
+
+color:#6b7280;
+
+margin-bottom:6px;
+
+text-transform:uppercase;
+
+}
+
+.value{
+
+font-size:18px;
+
+color:#111827;
+
+}
+
+.status{
+
+display:inline-block;
+
+background:#22c55e;
+
+color:white;
+
+padding:10px 20px;
+
+border-radius:30px;
+
+font-weight:bold;
+
+}
+
+.description{
+
+background:#f8fafc;
+
+padding:20px;
+
+border-radius:12px;
+
+white-space:pre-wrap;
+
+line-height:1.6;
+
+}
+
+.footer{
+
+padding:25px;
+
+text-align:center;
+
+background:#f8fafc;
+
+font-size:14px;
+
+color:#6b7280;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="card">
+
+<div class="header">
+
+<div class="logo">
+
+📨
+
+</div>
+
+<div class="title">
+
+Новая заявка
+
+</div>
+
+<div class="subtitle">
+
+CRM Telegram Bot
+
+</div>
+
+</div>
+
+<div class="content">
+
+<div class="block">
+
+<div class="label">
+
+Номер заявки
+
+</div>
+
+<div class="value">
+
+#{{id}}
+
+</div>
+
+</div>
+
+<div class="block">
+
+<div class="label">
+
+Дата
+
+</div>
+
+<div class="value">
+
+{{date}}
+
+</div>
+
+</div>
+
+<div class="block">
+
+<div class="label">
+
+Имя клиента
+
+</div>
+
+<div class="value">
+
+{{name}}
+
+</div>
+
+</div>
+
+<div class="block">
+
+<div class="label">
+
+Телефон
+
+</div>
+
+<div class="value">
+
+{{phone}}
+
+</div>
+
+</div>
+
+<div class="block">
+
+<div class="label">
+
+Описание
+
+</div>
+
+<div class="description">
+
+{{description}}
+
+</div>
+
+</div>
+
+<div class="block">
+
+<div class="label">
+
+Статус
+
+</div>
+
+<div class="status">
+
+{{status}}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+Это письмо создано автоматически системой CRM Telegram Bot.
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,32 +1,57 @@
-from telegram import Bot
+import logging
 
-from app.config.settings import settings
 from app.models.application import Application
+
+from app.services.telegram_service import telegram_service
+from app.services.email_service import email_service
+
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationService:
-    """Отправка уведомлений владельцу."""
+    """Центр отправки уведомлений."""
 
-    async def send_new_application(
+    async def notify(
         self,
         application: Application,
     ) -> None:
+        """Отправить все уведомления."""
 
-        bot = Bot(settings.bot_token)
+        # Telegram
+        try:
+            await telegram_service.send_new_application(
+                application,
+            )
 
-        text = (
-            "🆕 Новая заявка\n\n"
-            f"🆔 #{application.id}\n"
-            f"👤 {application.name}\n"
-            f"📞 {application.phone}\n\n"
-            f"📝 {application.description}\n\n"
-            f"📌 Статус: {application.status}"
-        )
+            logger.info(
+                f"Telegram уведомление отправлено (#{application.id})"
+            )
 
-        await bot.send_message(
-            chat_id=settings.owner_id,
-            text=text,
-        )
+        except Exception:
+            logger.exception(
+                "Ошибка отправки Telegram уведомления"
+            )
+
+        # Email
+        try:
+            success = email_service.send_new_application(
+                application,
+            )
+
+            if success:
+                logger.info(
+                    f"Email отправлен (#{application.id})"
+                )
+            else:
+                logger.warning(
+                    f"Email не отправлен (#{application.id})"
+                )
+
+        except Exception:
+            logger.exception(
+                "Ошибка отправки Email"
+            )
 
 
 notification_service = NotificationService()

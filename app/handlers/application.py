@@ -119,15 +119,17 @@ async def get_description(
 
     context.user_data["description"] = text
 
+    # Создаём заявку
     application = excel_service.create(
         name=context.user_data["name"],
         phone=context.user_data["phone"],
         description=context.user_data["description"],
     )
 
-    # Отправляем уведомление владельцу
-    await notification_service.send_new_application(application)
+    # Отправляем все уведомления
+    await notification_service.notify(application)
 
+    # Сообщение пользователю
     await update.message.reply_text(
         text=(
             f"✅ Заявка №{application.id} успешно создана!\n\n"
