@@ -10,8 +10,12 @@ from app.states.application_states import (
 
 from app.keyboards.cancel_keyboard import get_cancel_keyboard
 from app.keyboards.main_menu import get_main_menu
+
 from app.utils.validators import is_valid_phone
+
 from app.services.excel_service import excel_service
+from app.services.notification_service import notification_service
+
 
 async def start_application(
     update: Update,
@@ -116,17 +120,21 @@ async def get_description(
     context.user_data["description"] = text
 
     application = excel_service.create(
-    name=context.user_data["name"],
-    phone=context.user_data["phone"],
-    description=context.user_data["description"],
-)
+        name=context.user_data["name"],
+        phone=context.user_data["phone"],
+        description=context.user_data["description"],
+    )
+
+    # Отправляем уведомление владельцу
+    await notification_service.send_new_application(application)
 
     await update.message.reply_text(
         text=(
-            f"✅ Заявка №{application.id} успешно создана!\n"
-            f"👤 Имя: {context.user_data['name']}\n"
-            f"📞 Телефон: {context.user_data['phone']}\n"
-            f"📝 Заявка: {context.user_data['description']}\n\n"
+            f"✅ Заявка №{application.id} успешно создана!\n\n"
+            f"👤 Имя: {application.name}\n"
+            f"📞 Телефон: {application.phone}\n"
+            f"📝 Заявка:\n"
+            f"{application.description}\n\n"
             "📨 Мы свяжемся с вами в ближайшее время."
         ),
         reply_markup=get_main_menu(),
