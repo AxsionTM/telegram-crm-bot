@@ -23,3 +23,6 @@ app/data/*.xlsx
 # OS
 .DS_Store
 Thumbs.db
+
+# Local bot settings
+app/data/bot_settings.json

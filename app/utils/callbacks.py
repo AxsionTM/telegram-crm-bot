@@ -34,5 +34,9 @@ class AdminCallbacks:
     TELEGRAM_NOTIFY = "telegram_notify"
     ADMIN_MANAGE = "admin_manage"
 
+    # Переключатели уведомлений
+    TOGGLE_TELEGRAM = "toggle_telegram"
+    TOGGLE_EMAIL = "toggle_email"
+
     # Прочее
     IGNORE = "ignore"

@@ -1,6 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.utils.callbacks import AdminCallbacks
+from app.storage.settings_storage import settings_storage
 
 
 def get_admin_panel() -> InlineKeyboardMarkup:
@@ -54,7 +55,7 @@ def get_settings_keyboard() -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton(
-                "🔔 Telegram-уведомления",
+                "🔔 Уведомления",
                 callback_data=AdminCallbacks.TELEGRAM_NOTIFY,
             )
         ],
@@ -68,6 +69,38 @@ def get_settings_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 "🏠 Главное меню",
                 callback_data=AdminCallbacks.BACK,
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_notifications_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура управления уведомлениями."""
+
+    bot_settings = settings_storage.get()
+
+    tg_status = "✅ Вкл" if bot_settings.get("telegram_notifications", True) else "❌ Выкл"
+    email_status = "✅ Вкл" if bot_settings.get("email_notifications", True) else "❌ Выкл"
+
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                f"📱 Telegram: {tg_status}",
+                callback_data=AdminCallbacks.TOGGLE_TELEGRAM,
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                f"📧 Email: {email_status}",
+                callback_data=AdminCallbacks.TOGGLE_EMAIL,
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🔙 Назад",
+                callback_data=AdminCallbacks.SETTINGS,
             )
         ],
     ]

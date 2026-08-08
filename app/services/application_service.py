@@ -11,7 +11,7 @@ class ApplicationService:
         filters: FilterState,
     ):
 
-        applications = excel_service.get_all()
+        applications = list(reversed(excel_service.get_all()))  # сначала новые
 
         # ----------------------------
         # Поиск по ID
@@ -71,7 +71,7 @@ class ApplicationService:
         self,
         applications,
         page: int,
-        page_size: int = 10,
+        page_size: int = 3,
     ):
 
         start = (page - 1) * page_size
@@ -85,7 +85,7 @@ class ApplicationService:
     def pages_count(
         self,
         applications,
-        page_size: int = 10,
+        page_size: int = 3,
     ):
 
         if not applications:

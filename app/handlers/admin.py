@@ -9,7 +9,9 @@ from app.keyboards.admin_inline import (
     get_admin_panel,
     get_settings_keyboard,
     get_clear_db_confirm_keyboard,
+    get_notifications_keyboard,
 )
+from app.storage.settings_storage import settings_storage
 from app.keyboards.application_list import (
     get_application_list_keyboard,
     get_search_keyboard,
@@ -154,16 +156,14 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
         applications = excel_service.get_all()
 
-        with open(file_path, "rb") as document_file:
-            await query.message.reply_document(
-                document=InputFile(document_file, filename="applications.xlsx"),
-                caption=(
-                    f"📥 <b>Экспорт заявок</b>\n\n"
-                    f"Всего записей: <b>{len(applications)}</b>"
-                ),
-                parse_mode=ParseMode.HTML,
-            )
-
+        await query.message.reply_document(
+            document=InputFile(file_path, filename="applications.xlsx"),
+            caption=(
+                f"📥 <b>Экспорт заявок</b>\n\n"
+                f"Всего записей: <b>{len(applications)}</b>"
+            ),
+            parse_mode=ParseMode.HTML,
+        )
         await query.answer("Файл отправлен ✅")
         return
 
@@ -219,20 +219,57 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
         return
 
-    # ---------- Telegram-уведомления ----------
+    # ---------- Уведомления ----------
     if data == AdminCallbacks.TELEGRAM_NOTIFY:
-        owner = settings.owner_id or "—"
+        bot_settings = settings_storage.get()
+        tg = "включены ✅" if bot_settings.get("telegram_notifications", True) else "выключены ❌"
+        email = "включены ✅" if bot_settings.get("email_notifications", True) else "выключены ❌"
 
         await query.edit_message_text(
             text=(
-                "🔔 <b>Telegram-уведомления</b>\n\n"
-                f"Администратор (chat_id): <code>{owner}</code>\n\n"
-                "✅ Уведомления о новых заявках <b>включены</b>.\n\n"
-                "При создании заявки бот автоматически "
-                "отправляет сообщение администратору."
+                "🔔 <b>Уведомления</b>\n\n"
+                f"📱 Telegram: <b>{tg}</b>\n"
+                f"📧 Email: <b>{email}</b>\n\n"
+                "Нажмите на кнопку, чтобы включить или выключить."
             ),
             parse_mode=ParseMode.HTML,
-            reply_markup=get_settings_keyboard(),
+            reply_markup=get_notifications_keyboard(),
+        )
+        return
+
+    # ---------- Переключатель Telegram ----------
+    if data == AdminCallbacks.TOGGLE_TELEGRAM:
+        bot_settings = settings_storage.toggle("telegram_notifications")
+        tg = "включены ✅" if bot_settings.get("telegram_notifications", True) else "выключены ❌"
+        email = "включены ✅" if bot_settings.get("email_notifications", True) else "выключены ❌"
+
+        await query.edit_message_text(
+            text=(
+                "🔔 <b>Уведомления</b>\n\n"
+                f"📱 Telegram: <b>{tg}</b>\n"
+                f"📧 Email: <b>{email}</b>\n\n"
+                "Нажмите на кнопку, чтобы включить или выключить."
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_notifications_keyboard(),
+        )
+        return
+
+    # ---------- Переключатель Email ----------
+    if data == AdminCallbacks.TOGGLE_EMAIL:
+        bot_settings = settings_storage.toggle("email_notifications")
+        tg = "включены ✅" if bot_settings.get("telegram_notifications", True) else "выключены ❌"
+        email = "включены ✅" if bot_settings.get("email_notifications", True) else "выключены ❌"
+
+        await query.edit_message_text(
+            text=(
+                "🔔 <b>Уведомления</b>\n\n"
+                f"📱 Telegram: <b>{tg}</b>\n"
+                f"📧 Email: <b>{email}</b>\n\n"
+                "Нажмите на кнопку, чтобы включить или выключить."
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_notifications_keyboard(),
         )
         return
 
