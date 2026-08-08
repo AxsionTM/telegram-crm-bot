@@ -1,13 +1,25 @@
+# Virtual environment
 venv/
-.env
-.env.example
+.venv/
 
+# Environment secrets
+.env
+
+# IDE
 .idea/
 .vscode/
 
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 
+# Data (Excel with real applications)
 *.xlsx
+app/data/*.xlsx
 
+# OS
 .DS_Store
+Thumbs.db
