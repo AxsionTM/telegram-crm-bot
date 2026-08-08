@@ -135,3 +135,20 @@ class ExcelStorage:
                 return True
 
         return False
+
+    def clear_all(self) -> int:
+        """Очищает все заявки. Возвращает количество удалённых."""
+        applications = self.get_all()
+        count = len(applications)
+
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Applications"
+        sheet.append(self.HEADERS)
+        workbook.save(EXCEL_FILE)
+
+        return count
+
+    def get_file_path(self) -> Path:
+        """Путь к Excel-файлу для экспорта."""
+        return EXCEL_FILE

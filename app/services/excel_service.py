@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from app.models.application import Application
 from app.storage.excel_storage import ExcelStorage
 
@@ -31,6 +33,12 @@ class ExcelService:
 
     def delete(self, application_id: int) -> bool:
         return self.storage.delete(application_id)
+
+    def clear_all(self) -> int:
+        return self.storage.clear_all()
+
+    def get_file_path(self) -> Path:
+        return self.storage.get_file_path()
 
 
 excel_service = ExcelService()

@@ -1,9 +1,15 @@
-from telegram import Update
+from pathlib import Path
+
+from telegram import Update, InputFile
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from app.config.settings import settings
-from app.keyboards.admin_inline import get_admin_panel
+from app.keyboards.admin_inline import (
+    get_admin_panel,
+    get_settings_keyboard,
+    get_clear_db_confirm_keyboard,
+)
 from app.keyboards.application_list import (
     get_application_list_keyboard,
     get_search_keyboard,
@@ -126,21 +132,125 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
         return
 
-    # ---------- Настройки ----------
+    # ---------- Настройки (меню) ----------
     if data == AdminCallbacks.SETTINGS:
         await query.edit_message_text(
             text=(
                 "⚙️ <b>Настройки CRM</b>\n\n"
-                "Раздел находится в разработке.\n\n"
-                "В следующих обновлениях здесь появятся:\n\n"
-                "• Экспорт Excel\n"
-                "• Очистка базы\n"
-                "• SMTP-настройки\n"
-                "• Telegram-уведомления\n"
-                "• Управление администраторами"
+                "Выберите раздел настроек."
             ),
             parse_mode=ParseMode.HTML,
-            reply_markup=get_admin_panel(),
+            reply_markup=get_settings_keyboard(),
+        )
+        return
+
+    # ---------- Экспорт Excel ----------
+    if data == AdminCallbacks.EXPORT_EXCEL:
+        file_path = excel_service.get_file_path()
+
+        if not file_path.exists():
+            await query.answer("Файл не найден.", show_alert=True)
+            return
+
+        applications = excel_service.get_all()
+
+        with open(file_path, "rb") as document_file:
+            await query.message.reply_document(
+                document=InputFile(document_file, filename="applications.xlsx"),
+                caption=(
+                    f"📥 <b>Экспорт заявок</b>\n\n"
+                    f"Всего записей: <b>{len(applications)}</b>"
+                ),
+                parse_mode=ParseMode.HTML,
+            )
+
+        await query.answer("Файл отправлен ✅")
+        return
+
+    # ---------- Очистка базы (подтверждение) ----------
+    if data == AdminCallbacks.CLEAR_DB:
+        count = len(excel_service.get_all())
+
+        await query.edit_message_text(
+            text=(
+                "🗑 <b>Очистка базы</b>\n\n"
+                f"Сейчас в базе: <b>{count}</b> заявок.\n\n"
+                "⚠️ Это действие <b>нельзя отменить</b>.\n"
+                "Все заявки будут удалены.\n\n"
+                "Вы уверены?"
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_clear_db_confirm_keyboard(),
+        )
+        return
+
+    # ---------- Очистка базы (подтверждено) ----------
+    if data == AdminCallbacks.CLEAR_DB_CONFIRM:
+        deleted = excel_service.clear_all()
+
+        await query.edit_message_text(
+            text=(
+                "🗑 <b>База очищена</b>\n\n"
+                f"Удалено заявок: <b>{deleted}</b>"
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_settings_keyboard(),
+        )
+        return
+
+    # ---------- SMTP-настройки ----------
+    if data == AdminCallbacks.SMTP_SETTINGS:
+        login = settings.email_login or "—"
+        receiver = settings.email_receiver or "—"
+        server = settings.smtp_server or "—"
+        port = settings.smtp_port or "—"
+
+        await query.edit_message_text(
+            text=(
+                "📧 <b>SMTP-настройки</b>\n\n"
+                f"📤 Отправитель: <code>{login}</code>\n"
+                f"📥 Получатель: <code>{receiver}</code>\n"
+                f"🖥 Сервер: <code>{server}</code>\n"
+                f"🔌 Порт: <code>{port}</code>\n\n"
+                "ℹ️ Изменить настройки можно в файле <code>.env</code>"
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_settings_keyboard(),
+        )
+        return
+
+    # ---------- Telegram-уведомления ----------
+    if data == AdminCallbacks.TELEGRAM_NOTIFY:
+        owner = settings.owner_id or "—"
+
+        await query.edit_message_text(
+            text=(
+                "🔔 <b>Telegram-уведомления</b>\n\n"
+                f"Администратор (chat_id): <code>{owner}</code>\n\n"
+                "✅ Уведомления о новых заявках <b>включены</b>.\n\n"
+                "При создании заявки бот автоматически "
+                "отправляет сообщение администратору."
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_settings_keyboard(),
+        )
+        return
+
+    # ---------- Управление администраторами ----------
+    if data == AdminCallbacks.ADMIN_MANAGE:
+        owner = settings.owner_id or "—"
+
+        await query.edit_message_text(
+            text=(
+                "👤 <b>Администраторы</b>\n\n"
+                f"Текущий администратор:\n"
+                f"<code>{owner}</code>\n\n"
+                "ℹ️ Сейчас поддерживается один администратор.\n"
+                "Изменить можно в файле <code>.env</code> "
+                "(переменная <code>OWNER_ID</code>)."
+            ),
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_settings_keyboard(),
         )
         return
 
@@ -294,7 +404,6 @@ async def search_text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     text = update.message.text.strip()
     filters = filter_service.get(update.effective_user.id)
 
-    # Сбрасываем предыдущие поиски
     filters.search_id = ""
     filters.search_name = ""
     filters.search_phone = ""
@@ -307,7 +416,6 @@ async def search_text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif search_mode == "phone":
         filters.search_phone = text
 
-    # Очищаем режим поиска
     context.user_data.pop("search_mode", None)
 
     applications = application_service.get_filtered(filters)

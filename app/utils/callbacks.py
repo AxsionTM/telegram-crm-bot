@@ -26,5 +26,13 @@ class AdminCallbacks:
     FILTER_CANCELLED = "filter_cancelled"
     CLEAR_FILTERS = "clear_filters"
 
+    # Настройки
+    EXPORT_EXCEL = "export_excel"
+    CLEAR_DB = "clear_db"
+    CLEAR_DB_CONFIRM = "clear_db_confirm"
+    SMTP_SETTINGS = "smtp_settings"
+    TELEGRAM_NOTIFY = "telegram_notify"
+    ADMIN_MANAGE = "admin_manage"
+
     # Прочее
     IGNORE = "ignore"
